@@ -8,12 +8,13 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "OnlineSubsystem.h"
-#include "Interfaces/OnlineSessionInterface.h"
+#include "OnlineSessionSettings.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ALobbyPluginCharacter
 
-ALobbyPluginCharacter::ALobbyPluginCharacter()
+ALobbyPluginCharacter::ALobbyPluginCharacter() :
+	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -94,6 +95,63 @@ void ALobbyPluginCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &ALobbyPluginCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &ALobbyPluginCharacter::TouchStopped);
+}
+
+void ALobbyPluginCharacter::CreateGameSession()
+{
+	//Called when pressing host btn
+	if(!OnlineSessionInterface.IsValid())
+	{
+		return;
+	}
+
+	auto ExistingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
+	if(ExistingSession != nullptr)
+	{
+		OnlineSessionInterface->DestroySession(NAME_GameSession);
+	}
+
+	OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
+
+	TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
+	SessionSettings->bIsLANMatch = false;
+	SessionSettings->bAntiCheatProtected = false;
+	SessionSettings->NumPublicConnections = 4;
+	SessionSettings->bAllowJoinInProgress = true;
+	SessionSettings->bAllowJoinViaPresence = true;
+	SessionSettings->bShouldAdvertise = true;
+	SessionSettings->bUsesPresence = true;
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+}
+
+void ALobbyPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if(bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Green,
+				FString::Printf(TEXT("Created session %s"), *SessionName.ToString())
+			);
+		}
+	}
+	else
+	{
+		if(GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Failed to create game session!"))
+			);
+		}
+	}
 }
 
 void ALobbyPluginCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
