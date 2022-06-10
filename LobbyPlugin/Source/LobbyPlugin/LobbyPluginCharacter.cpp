@@ -14,7 +14,8 @@
 // ALobbyPluginCharacter
 
 ALobbyPluginCharacter::ALobbyPluginCharacter() :
-	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete))
+	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
+	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionsComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -121,9 +122,29 @@ void ALobbyPluginCharacter::CreateGameSession()
 	SessionSettings->bAllowJoinViaPresence = true;
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
+	SessionSettings->bUseLobbiesIfAvailable = true;
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+}
+
+void ALobbyPluginCharacter::JoinGameSession()
+{
+	// Find valid session
+	if(!OnlineSessionInterface.IsValid())
+	{
+		return;
+	}
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->MaxSearchResults = 10000;
+	SessionSearch->bIsLanQuery = false;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
 }
 
 void ALobbyPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -152,6 +173,40 @@ void ALobbyPluginCharacter::OnCreateSessionComplete(FName SessionName, bool bWas
 			);
 		}
 	}
+}
+
+void ALobbyPluginCharacter::OnFindSessionsComplete(bool bWasSuccessful)
+{
+	if(bWasSuccessful)
+	{
+		for (auto Result : SessionSearch->SearchResults)
+		{
+			FString Id = Result.GetSessionIdStr();
+			FString User = Result.Session.OwningUserName;
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Cyan,
+					FString::Printf(TEXT("ID: %s, User: %s"), *Id, *User)
+				);
+			}
+		}
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Failed to find game sessions!"))
+			);
+		}
+	}
+	
 }
 
 void ALobbyPluginCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
