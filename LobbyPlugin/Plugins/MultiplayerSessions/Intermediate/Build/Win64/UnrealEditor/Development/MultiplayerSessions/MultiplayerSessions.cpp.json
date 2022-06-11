@@ -1,0 +1,14 @@
+{
+    "Version": "1.1",
+    "Data": {
+        "Source": "e:\\ue5\\projects\\ue5-multiplayer-lobby\\lobbyplugin\\plugins\\multiplayersessions\\source\\multiplayersessions\\private\\multiplayersessions.cpp",
+        "ProvidedModule": "",
+        "PCH": "e:\\ue5\\projects\\ue5-multiplayer-lobby\\lobbyplugin\\intermediate\\build\\win64\\lobbyplugineditor\\development\\engine\\sharedpch.engine.shadowerrors.h.pch",
+        "Includes": [
+            "e:\\ue5\\projects\\ue5-multiplayer-lobby\\lobbyplugin\\plugins\\multiplayersessions\\intermediate\\build\\win64\\unrealeditor\\development\\multiplayersessions\\definitions.multiplayersessions.h",
+            "e:\\ue5\\projects\\ue5-multiplayer-lobby\\lobbyplugin\\plugins\\multiplayersessions\\source\\multiplayersessions\\public\\multiplayersessions.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

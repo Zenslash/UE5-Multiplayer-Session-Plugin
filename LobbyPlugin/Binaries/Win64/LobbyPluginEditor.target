@@ -33,6 +33,18 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/MultiplayerSessions/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/MultiplayerSessions/Binaries/Win64/UnrealEditor-MultiplayerSessions.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/MultiplayerSessions/Binaries/Win64/UnrealEditor-MultiplayerSessions.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/Win64/AgentInterface.dll",
 			"Type": "RequiredResource"
 		},
@@ -2988,6 +3000,10 @@
 	"RuntimeDependencies": [
 		{
 			"Path": "$(ProjectDir)/LobbyPlugin.uproject",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/MultiplayerSessions/MultiplayerSessions.uplugin",
 			"Type": "UFS"
 		},
 		{

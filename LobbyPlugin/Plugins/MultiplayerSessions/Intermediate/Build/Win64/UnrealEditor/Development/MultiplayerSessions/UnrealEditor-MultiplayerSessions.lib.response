@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-MultiplayerSessions.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"E:\UE5\Projects\UE5-Multiplayer-Lobby\LobbyPlugin\Intermediate\Build\Win64\LobbyPluginEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"E:\UE5\Projects\UE5-Multiplayer-Lobby\LobbyPlugin\Plugins\MultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\MultiplayerSessions\MultiplayerSessions.cpp.obj"
+"E:\UE5\Projects\UE5-Multiplayer-Lobby\LobbyPlugin\Plugins\MultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\MultiplayerSessions\Default.rc2.res"
+/OUT:"E:\UE5\Projects\UE5-Multiplayer-Lobby\LobbyPlugin\Plugins\MultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\MultiplayerSessions\UnrealEditor-MultiplayerSessions.lib"
