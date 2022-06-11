@@ -4,3 +4,6 @@ LobbyPlugin/.vs/
 LobbyPlugin/Saved/
 LobbyPlugin/Binaries/
 LobbyPlugin/Build/
+LobbyPlugin/Plugins/MultiplayerSessions/Intermediate/
+LobbyPlugin/Plugins/MultiplayerSessions/Binaries/
+LobbyPlugin/Plugins/MultiplayerSessions/Saved/
