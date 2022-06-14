@@ -6,8 +6,11 @@
 
 #include "Components/Button.h"
 
-void UMenuWidget::MenuSetup()
+void UMenuWidget::MenuSetup(int32 NumberOfPublicConnections, FString LobbyType)
 {
+	NumPublicConnections = NumberOfPublicConnections;
+	MatchType = LobbyType;
+
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
 	bIsFocusable = true;
@@ -31,6 +34,11 @@ void UMenuWidget::MenuSetup()
 	{
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 	}
+
+	if(MultiplayerSessionsSubsystem)
+	{
+		MultiplayerSessionsSubsystem->MultiplayerOnCreateSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
+	}
 }
 
 bool UMenuWidget::Initialize()
@@ -52,22 +60,51 @@ bool UMenuWidget::Initialize()
 	return true;
 }
 
+void UMenuWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
+{
+	MenuTearDown();
+	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+}
+
+void UMenuWidget::OnCreateSession(bool bWasSuccessful)
+{
+	if(bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Green,
+				FString(TEXT("Session created successfully!"))
+			);
+		}
+
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->ServerTravel(FString("/Game/ThirdPerson/Maps/LobbyMap?listen"));
+		}
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString(TEXT("Session creation failed!"))
+			);
+		}
+	}
+}
+
 void UMenuWidget::HostBtnClicked()
 {
-	if(GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Yellow,
-			FString(TEXT("Host Btn Clicked!"))
-		);
-	}
-
 	if(MultiplayerSessionsSubsystem)
 	{
-		//TODO Get params from UI
-		MultiplayerSessionsSubsystem->CreateSession(4, FString("FreeForAll"));
+		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
 	}
 }
 
@@ -81,5 +118,21 @@ void UMenuWidget::JoinBtnClicked()
 			FColor::Yellow,
 			FString(TEXT("Join Btn Clicked!"))
 		);
+	}
+}
+
+void UMenuWidget::MenuTearDown()
+{
+	RemoveFromParent();
+	UWorld* World = GetWorld();
+	if(World)
+	{
+		APlayerController* PlayerController = World->GetFirstPlayerController();
+		if(PlayerController)
+		{
+			FInputModeGameOnly InputModeData;
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->SetShowMouseCursor(false);
+		}
 	}
 }
